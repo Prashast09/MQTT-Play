@@ -12,7 +12,7 @@ import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-
+import org.eclipse.paho.client.mqttv3.internal.ConnectActionListener;
 
 //Cloud MQTT supported by AWS EC2 instance will be used as server using Mosquitto MQTT on cloud
 //All credentials given below should be replaced by your instance usernamme and password registered in CLOUDMQTT
@@ -31,7 +31,10 @@ public class MqttHelper {
     final String username = "xyz";
     final String password = "awmuOvY-4ndl";
 
+    Context mContext;
+
     public MqttHelper(Context context){
+        mContext = context;
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
@@ -96,6 +99,25 @@ public class MqttHelper {
         }
     }
 
+    public void sendMessageFromAndroid(){
+        MqttMessage mqttMessage = new MqttMessage("new message sent from deveice-android".getBytes());
+        mqttMessage.setQos(2);
+        mqttMessage.setRetained(false);
+        try {
+            mqttAndroidClient.publish("Loconav", mqttMessage, mContext, new IMqttActionListener() {
+                @Override public void onSuccess(IMqttToken asyncActionToken) {
+
+                }
+
+                @Override public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+
+                }
+            });
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void subscribeToTopic(Context context) {
         try {
@@ -116,4 +138,6 @@ public class MqttHelper {
             ex.printStackTrace();
         }
     }
+
+
 }
