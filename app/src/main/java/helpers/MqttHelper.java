@@ -13,20 +13,23 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-/**
- * Created by wildan on 3/19/2017.
- */
+
+//Cloud MQTT supported by AWS EC2 instance will be used as server using Mosquitto MQTT on cloud
+//All credentials given below should be replaced by your instance usernamme and password registered in CLOUDMQTT
+//for refernece find link:  https://customer.cloudmqtt.com/instance
+// and
+// https://wildanmsyah.wordpress.com/2017/05/11/mqtt-android-client-tutorial/#publisher
 
 public class MqttHelper {
     public MqttAndroidClient mqttAndroidClient;
 
-    final String serverUri = "tcp://broker.hivemq.com:1883";
+    final String serverUri = "xyz";
 
-    final String clientId = "ExampleAndroidClient";
-    final String subscriptionTopic = "sensor/+";
+    final String clientId = "clientId-Q8iJfi9e5m";
+    final String subscriptionTopic = "#";
 
-    final String username = "xxxxxxx";
-    final String password = "yyyyyyy";
+    final String username = "xyz";
+    final String password = "awmuOvY-4ndl";
 
     public MqttHelper(Context context){
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
@@ -51,19 +54,19 @@ public class MqttHelper {
 
             }
         });
-        connect();
+        connect(context);
     }
 
     public void setCallback(MqttCallbackExtended callback) {
         mqttAndroidClient.setCallback(callback);
     }
 
-    private void connect(){
+    private void connect(final Context context){
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
         mqttConnectOptions.setAutomaticReconnect(true);
         mqttConnectOptions.setCleanSession(false);
-        //mqttConnectOptions.setUserName(username);
-        //mqttConnectOptions.setPassword(password.toCharArray());
+        mqttConnectOptions.setUserName(username);
+        mqttConnectOptions.setPassword(password.toCharArray());
 
         try {
 
@@ -77,12 +80,13 @@ public class MqttHelper {
                     disconnectedBufferOptions.setPersistBuffer(false);
                     disconnectedBufferOptions.setDeleteOldestMessages(false);
                     mqttAndroidClient.setBufferOpts(disconnectedBufferOptions);
-                    subscribeToTopic();
+                    subscribeToTopic(context);
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                     Log.w("Mqtt", "Failed to connect to: " + serverUri + exception.toString());
+                    exception.printStackTrace();
                 }
             });
 
@@ -93,9 +97,9 @@ public class MqttHelper {
     }
 
 
-    private void subscribeToTopic() {
+    private void subscribeToTopic(Context context) {
         try {
-            mqttAndroidClient.subscribe(subscriptionTopic, 0, null, new IMqttActionListener() {
+            mqttAndroidClient.subscribe(subscriptionTopic, 0, context, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     Log.w("Mqtt","Subscribed!");
